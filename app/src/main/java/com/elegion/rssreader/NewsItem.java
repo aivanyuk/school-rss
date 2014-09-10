@@ -14,4 +14,9 @@ public class NewsItem {
     String mDescription;
     @Element(name = "link")
     String mLink;
+
+    @Override
+    public String toString() {
+        return mTitle;
+    }
 }

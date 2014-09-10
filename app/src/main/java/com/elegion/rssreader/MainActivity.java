@@ -4,7 +4,9 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.ListView;
+
+import org.simpleframework.xml.core.Persister;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -15,29 +17,23 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    private View mSendButton;
+    private ListView mListView;
+    private NewsAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_main);
-        mSendButton = findViewById(R.id.btn_load);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                runAsync();
-            }
-        });
+        mListView = (ListView) findViewById(R.id.list);
+        mAdapter = new NewsAdapter(this);
+        mListView.setAdapter(mAdapter);
+        runAsync();
     }
 
     private void runAsync() {
@@ -45,20 +41,24 @@ public class MainActivity extends ActionBarActivity {
             @Override
             protected List<NewsItem> doInBackground(Void... params) {
                 String data = loadData();
-                return null;
+                Persister persister = new Persister();
+                List<NewsItem> result = new ArrayList<NewsItem>();
+                try {
+                    NewsWrapper wrapper = persister.read(NewsWrapper.class, data, false);
+                    result.addAll(wrapper.getNews());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return result;
             }
 
             @Override
             protected void onPostExecute(List<NewsItem> newsItems) {
                 super.onPostExecute(newsItems);
+                mAdapter.addAll(newsItems);
             }
         }.execute();
-    }
-
-    @Override
-    protected void onPause() {
-        mSendButton.setOnClickListener(null);
-        super.onPause();
     }
 
     private String loadData() {
