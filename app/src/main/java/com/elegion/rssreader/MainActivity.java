@@ -1,5 +1,6 @@
 package com.elegion.rssreader;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -33,9 +35,24 @@ public class MainActivity extends ActionBarActivity {
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadData();
+                runAsync();
             }
         });
+    }
+
+    private void runAsync() {
+        new AsyncTask<Void, Void, List<NewsItem>>() {
+            @Override
+            protected List<NewsItem> doInBackground(Void... params) {
+                String data = loadData();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(List<NewsItem> newsItems) {
+                super.onPostExecute(newsItems);
+            }
+        }.execute();
     }
 
     @Override
